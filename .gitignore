@@ -1,1 +1,7 @@
 /target
+local-apply.sh
+local-plan.sh
+terraform/.terraform
+terraform/.terraform.lock.hcl
+terraform/plan.out
+.DS_Store
