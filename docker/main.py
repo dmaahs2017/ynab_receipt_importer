@@ -68,7 +68,7 @@ def process_image(file: str) -> (str, str):
     return msg, cost
 
 
-def post_transaction(budget_id: str, amnt: float, payee: str, memo: str, date: str, ynab_key: str):
+def post_transaction(budget_id: str, amnt: float, payee: str, memo: str, date: str, ynab_key: str, dry_run: bool):
     url = f'https://api.ynab.com/v1/budgets/{budget_id}/transactions'
 
     headers = {
@@ -121,7 +121,7 @@ def run_import(requeest_type: str, receipt: str, ynab_key: str, budget_id: str, 
         print("Payee: ", payee)
         print("Memo: ", memo)
         print("Date: ", date)
-        post_transaction(budget_id, amount, payee, memo, date)
+        post_transaction(budget_id, amount, payee, memo, date, ynab_key, dry_run)
 
         print()
 
@@ -139,3 +139,12 @@ def lambda_handler(event,context):
     else:
         dryrun=False
     run_import(request_type, receipt, ynab_key, budget_id, dryrun)
+    return {
+        "statusCode": 200,
+        "headers": {
+            "Content-Type": "application/json"
+        },
+        "body": json.dumps({
+            "Status": "OK"
+        })
+    }
