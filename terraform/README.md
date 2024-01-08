@@ -41,7 +41,7 @@ terraform plan -destroy -out plan.out
 
 ```shell
 # this mechanism is always scary, since the command is the same for create and destroy
-terraform apply plan.out 
+terraform apply plan.out
 ```
 
 ## Test from LAMBDA
@@ -56,7 +56,7 @@ cat imgs/auto_store.jpg | base64 -w0 | pbcopy
 {
   "RequestType": "put",
   "YnabKey": "empty",
-  "BudgetId": "00d897bf-4703-4976-af2a-35d1bdc9b673"
+  "BudgetId": "00d897bf-4703-4976-af2a-35d1bdc9b673",
   "DryRun": "true",
   "Receipt": ""
 }

@@ -132,8 +132,8 @@ def lambda_handler(event,context):
     print(f"Event: {event}")
     request_type=event['RequestType']
     receipt=event['Receipt']
-    ynab_key['YnabKey']
-    budget_id['BudgetId']
+    ynab_key=event['YnabKey']
+    budget_id=event['BudgetId']
     if event['DryRun'] == "true":
         dryrun=True
     else:
