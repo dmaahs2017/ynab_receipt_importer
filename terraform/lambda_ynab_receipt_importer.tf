@@ -33,7 +33,7 @@ resource "aws_iam_role" "ynab_receipt_importer_role" {
             "secretsmanager:GetSecretValue",
           ],
           "Effect" : "Allow",
-          "Resource" : "arn:aws:secretsmanager:${local.region}:${data.aws_caller_identity.current.account_id}:secret:openapi-key"
+          "Resource" : "arn:aws:secretsmanager:${local.region}:${data.aws_caller_identity.current.account_id}:secret:openapi-key*"
         }
       ]
       "Version" : "2012-10-17"
