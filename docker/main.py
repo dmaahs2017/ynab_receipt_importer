@@ -21,7 +21,7 @@ def get_secret(secret_name: str) -> (str):
         # Check if the secret uses string or binary data
         if 'SecretString' in response:
             secret = response['SecretString']
-            return json.loads(secret)
+            return secret
         else:
             return "" # if our secret is binary, that would be bad
     except Exception as e:
