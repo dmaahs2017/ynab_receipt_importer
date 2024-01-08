@@ -104,7 +104,7 @@ def post_transaction(budget_id: str, amnt: float, payee: str, memo: str, date: s
 def run_import(requeest_type: str, receipt: str, ynab_key: str, budget_id: str, dry_run: bool):
     total_cost = 0.0
     output_file_path = "/tmp/image.jpg"
-    decode_base64_to_file(encoded_string, output_file_path)
+    decode_base64_to_file(receipt, output_file_path)
 
     for file in ["/tmp/image.jpg"]:
         msg, cost = process_image(file)
