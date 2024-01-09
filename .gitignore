@@ -5,3 +5,4 @@ terraform/.terraform
 terraform/.terraform.lock.hcl
 terraform/plan.out
 .DS_Store
+payload.json

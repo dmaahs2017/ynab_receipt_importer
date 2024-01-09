@@ -101,7 +101,7 @@ def post_transaction(budget_id: str, amnt: float, payee: str, memo: str, date: s
         print("dry run, no transaction created")
         print(f"{transaction_data}")
 
-def run_import(requeest_type: str, receipt: str, ynab_key: str, budget_id: str, dry_run: bool):
+def run_import(requeest_type: str, receipt: str, ynab_key: str, budget_id: str, dry_run: bool) -> dict:
     total_cost = 0.0
     output_file_path = "/tmp/image.jpg"
     decode_base64_to_file(receipt, output_file_path)
@@ -124,27 +124,31 @@ def run_import(requeest_type: str, receipt: str, ynab_key: str, budget_id: str, 
         post_transaction(budget_id, amount, payee, memo, date, ynab_key, dry_run)
 
         print()
+        gpt_data = {"Amount": amount, "Payee": payee, "Memo": memo, "Date": date}
+        return gpt_data
 
 
     print("OpenAI api cost = ", total_cost)
 
 def lambda_handler(event,context):
-    print(f"Event: {event}")
-    request_type=event['RequestType']
-    receipt=event['Receipt']
-    ynab_key=event['YnabKey']
-    budget_id=event['BudgetId']
-    if event['DryRun'] == "true":
+    event_body=json.loads(event['body'])
+    print(f"Event Body: {event_body}")
+    request_type=event_body['RequestType']
+    receipt=event_body['Receipt']
+    ynab_key=event_body['YnabKey']
+    budget_id=event_body['BudgetId']
+    if event_body['DryRun'] == "true":
         dryrun=True
     else:
         dryrun=False
-    run_import(request_type, receipt, ynab_key, budget_id, dryrun)
+    result = run_import(request_type, receipt, ynab_key, budget_id, dryrun)
     return {
         "statusCode": 200,
         "headers": {
             "Content-Type": "application/json"
         },
         "body": json.dumps({
-            "Status": "OK"
+            "Status": "OK",
+            "GPT_Data": json.dumps(result)
         })
     }

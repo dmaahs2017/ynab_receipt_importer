@@ -52,7 +52,7 @@ resource "aws_lambda_function" "ynab_receipt_importer_function" {
   # handler                        = "main.lambda_handler"
   memory_size                    = 512
   package_type                   = "Image"
-  image_uri                      = "232611481816.dkr.ecr.us-east-1.amazonaws.com/ynabri:0.0.7"
+  image_uri                      = "232611481816.dkr.ecr.us-east-1.amazonaws.com/ynabri:0.0.11"
   reserved_concurrent_executions = -1
   role                           = aws_iam_role.ynab_receipt_importer_role.arn
   # runtime                        = "python3.11"
