@@ -40,6 +40,5 @@ curl -X $method -H "Content-Type: $content_type" \
     ${function_url}
 
 if [[ -f payload.json ]]; then
-  echo "removing payload.json"
-  # rm payload.json
+  rm payload.json
 fi
