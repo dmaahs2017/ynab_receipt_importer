@@ -17,3 +17,10 @@ vi lambda_ynab_receipt_importer.tf
 terraform plan -out plan.out
 terraform apply plan.out
 ```
+
+## test lambda
+
+```shell
+# from repo root
+./invoke-function.sh imgs/auto_store.jpg
+```
