@@ -47,6 +47,14 @@ def decode_base64_to_file(encoded_string: str, output_file_path: str):
 def process_image(file: str) -> (str, str):
     text = pytesseract.image_to_string(Image.open(file), lang='eng')
 
+    prompt = f"""You are a receipt scanner that generates JSON.
+You will recieve text extracted from a receipt, and generate JSON with 4 fields, 'grand_total', 'payee', 'memo', and 'date'.
+
+'grand_total' is dollar amount in floating point format.
+'payee' is the store the reciept is from.
+'memo' is a short 3-5 word description of what was purchased
+'date' is when the items were purchased in YYYY-MM-DD format. It will be within 30 days of {date.today()}
+"""
     gpt_key=get_secret("openapi-key")
 
     ai_client = OpenAI(
@@ -54,14 +62,18 @@ def process_image(file: str) -> (str, str):
     )
 
     completion = ai_client.chat.completions.create(
-      model="gpt-3.5-turbo",
+      model="gpt-3.5-turbo-1106",
+      response_format={ "type": "json_object" },
       messages=[
-          {"role": "system", "content": "You are a receipt scanner. The user will send text extracted from a receipt, and on 4 separate lines you will print this data about the reciept. One, Grand total. Two, Payee. Three, a short 3 to 5 word memo that describe the items purchased, Four, the date of the transaction in YYYY-MM-DD format."},
-        {"role": "user", "content": f"{text}"}
+          {
+              "role": "system", 
+              "content": prompt
+           },
+        {"role": "user", "content": text}
       ]
     )
 
-    msg = completion.choices[0].message.content
+    msg = json.loads(completion.choices[0].message.content)
 
     cost = completion.usage.prompt_tokens *(0.0010/1000) + completion.usage.completion_tokens *(0.0020/1000)
 
@@ -102,33 +114,30 @@ def post_transaction(budget_id: str, amnt: float, payee: str, memo: str, date: s
         print(f"{transaction_data}")
 
 def run_import(requeest_type: str, receipt: str, ynab_key: str, budget_id: str, dry_run: bool) -> dict:
-    total_cost = 0.0
     output_file_path = "/tmp/image.jpg"
     decode_base64_to_file(receipt, output_file_path)
 
-    for file in ["/tmp/image.jpg"]:
-        msg, cost = process_image(file)
-        total_cost += cost
+    file = "/tmp/image.jpg"
+    gpt_dict, cost = process_image(file)
 
-        lines = msg.split("\n")
-        amount = -int(float(lines[0][14:]) * 1000)
-        payee = lines[1][7:]
-        memo = lines[2][6:]
-        date = lines[3][6:]
+    amount = -int(gpt_dict['grand_total'] * 1000)
+    payee = gpt_dict['payee']
+    memo = gpt_dict['memo']
+    date = gpt_dict['date']
 
-        print(file)
-        print("Amount: ", amount)
-        print("Payee: ", payee)
-        print("Memo: ", memo)
-        print("Date: ", date)
-        post_transaction(budget_id, amount, payee, memo, date, ynab_key, dry_run)
+    print("Amount: ", amount)
+    print("Payee: ", payee)
+    print("Memo: ", memo)
+    print("Date: ", date)
 
-        print()
-        gpt_data = {"Amount": amount, "Payee": payee, "Memo": memo, "Date": date}
-        return gpt_data
+    post_transaction(budget_id, amount, payee, memo, date, ynab_key, dry_run)
+
+    gpt_data = {"Amount": amount, "Payee": payee, "Memo": memo, "Date": date}
+    print("OpenAI api cost = ", cost)
+
+    return gpt_data
 
 
-    print("OpenAI api cost = ", total_cost)
 
 def lambda_handler(event,context):
     event_body=json.loads(event['body'])
